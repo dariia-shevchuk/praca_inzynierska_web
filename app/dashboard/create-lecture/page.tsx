@@ -13,13 +13,13 @@ import { onAuthStateChanged } from "firebase/auth";
 
 
 const CreatingLecturesScreen = () => {
-    const [teacherGroups, setTeacherGroups] = useState([]);
+    const [teacherGroups, setTeacherGroups] = useState<string[]>([]);
     const [questionTitle, setQuestionTitle] = useState('');
-    const [answers, setAnswers] = useState([]);
+    const [answers, setAnswers] = useState<{ text: string }[]>([]);
     const [text, setText] = useState('');
     const [title, setTitle] = useState('');
     const [isTest, setIsTest] = useState(false);
-    const [test, setTest] = useState([])
+    const [test, setTest] = useState<{ title: string; text: string; practicumQuestion?: string; correctAnswer?: string }[]>([])
     const [inputHeight1, setInputHeight1] = useState(45);
     const [inputHeight2, setInputHeight2] = useState(45);
     const [inputHeight3, setInputHeight3] = useState(45);
@@ -49,7 +49,7 @@ const CreatingLecturesScreen = () => {
                     // const studentIds = [...new Set(marks.map(mark => mark.id))];
                     if (groups){
                         console.log(groups);
-                        const teacherGroups = groups.map(group => group.id);
+                        const teacherGroups: string[] = groups.map((group: { id: string }) => group.id);
                         setTeacherGroups(teacherGroups);
                     }
                 } else {
@@ -113,7 +113,7 @@ const CreatingLecturesScreen = () => {
 
     
     const addQuestion = () => {
-        let newQuestion;
+        let newQuestion: { title: string; text: string; practicumQuestion?: string; correctAnswer?: string; };
         if (questionTitle !== "" && text !== "" && privacy === "without"){
             newQuestion = {title : questionTitle, text : text};
             setTest(prevTest => [...prevTest, newQuestion]);
@@ -142,7 +142,7 @@ const CreatingLecturesScreen = () => {
         }
     }
     
-    const setPrivacyTest = (privacy) => {
+    const setPrivacyTest = (privacy: React.SetStateAction<string>) => {
         setPrivacy(privacy);
         if (privacy === "with") {
             setIsPracticum(true);
