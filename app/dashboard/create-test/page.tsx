@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, SetStateAction } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db } from "@/firebaseConfig";
 import { doc, collection, addDoc, getDoc, updateDoc, setDoc } from "firebase/firestore";
@@ -12,12 +12,12 @@ import { toast } from "sonner"
 import { onAuthStateChanged } from "firebase/auth";
 
 const LearningAddingScreen = () => {
-  const [teacherGroups, setTeacherGroups] = useState([]);
+  const [teacherGroups, setTeacherGroups] = useState<string[]>([]);
   const [questionTitle, setQuestionTitle] = useState("");
   const [answers, setAnswers] = useState([{ text: "" }]);
   const [title, setTitle] = useState("");
   const [isTest, setIsTest] = useState(false);
-  const [test, setTest] = useState([]);
+  const [test, setTest] = useState<{ question: string; answer: string; options: string[] }[]>([]);
   const [privacy, setPrivacy] = useState("teacher");
   const [isPrivacy, setIsPrivacy] = useState(false);
   const [correctAnswer, setCorrectAnswer] = useState("");
@@ -43,7 +43,7 @@ const LearningAddingScreen = () => {
               // const studentIds = [...new Set(marks.map(mark => mark.id))];
               if (groups){
                   console.log(groups);
-                  const teacherGroups = groups.map(group => group.id);
+                    const teacherGroups: string[] = groups.map((group: { id: string }) => group.id);
                   setTeacherGroups(teacherGroups.reverse());
               }
           } else {
@@ -84,7 +84,7 @@ const LearningAddingScreen = () => {
     }
   };
 
-  const setPrivacyTest = (privacy) => {
+  const setPrivacyTest = (privacy: SetStateAction<string>) => {
     setPrivacy(privacy);
     setIsPrivacy(true);
     if( privacy === 'teacher'){
@@ -92,7 +92,7 @@ const LearningAddingScreen = () => {
     }
   }
 
-  const chooseGroup = (id) => {
+  const chooseGroup = (id: SetStateAction<string>) => {
     setGroup(id);
     setIsGroup(false);
 }
@@ -113,8 +113,18 @@ const LearningAddingScreen = () => {
     setAnswers([...answers, { text: "" }]);
   };
 
-  const updateAnswer = (text, index) => {
-    const newAnswers = [...answers];
+  interface Answer {
+    text: string;
+  }
+
+  interface Test {
+    question: string;
+    answer: string;
+    options: string[];
+  }
+
+  const updateAnswer = (text: string, index: number) => {
+    const newAnswers: Answer[] = [...answers];
     newAnswers[index].text = text;
     setAnswers(newAnswers);
   };
