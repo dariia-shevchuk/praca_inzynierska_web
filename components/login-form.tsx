@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState } from 'react';
@@ -6,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/firebaseConfig';
 import { GalleryVerticalEnd } from "lucide-react"
+import { getDoc, doc } from 'firebase/firestore';
+import { db } from '@/firebaseConfig'; // Assuming you have a Firestore instance
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -25,8 +26,22 @@ export function LoginForm({
     try {
       console.log(email);
       console.log(password);
-      await signInWithEmailAndPassword(auth, email, password);
-      router.push('/');
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Fetch user role from Firestore
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        if (userData.permission === 'teacher') {
+          router.push('/');
+        } else {
+          setErrorMessage('Only teachers can log in.');
+          await auth.signOut(); // Sign out the user if they are not a teacher
+        }
+      } else {
+        setErrorMessage('User data not found.');
+      }
     } catch (error) {
       if (error instanceof Error) {
         setErrorMessage(error.message);
@@ -36,6 +51,7 @@ export function LoginForm({
       console.error(error);
     }
   };
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       {/* <form onSubmit={onSubmit}> */}
@@ -98,6 +114,7 @@ export function LoginForm({
         By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
         and <a href="#">Privacy Policy</a>.
       </div>
+      {errorMessage && <div className="text-red-500">{errorMessage}</div>}
     </div>
   )
 }
